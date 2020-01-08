@@ -9,10 +9,12 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 
 crossValidation = False
-model_path = '../../models/ShallowConvnet/initialModels/' # storing/loding subject-specific models
-model_sup_path = '../../models/ShallowConvnet/superposModels/' #stotring/loading superimposed models 
-result_path = '../../results/ShallowConvNet/' # numerical results 
-data_path = '../../dataset/shallowconvnet/' # data
+
+PATH = '/usr/scratch/xavier/herschmi/HD_superpos/'
+model_path = PATH+'models/ShallowConvnet/initialModels/' # storing/loding subject-specific models
+model_sup_path = PATH+'models/ShallowConvnet/superposModels/' #stotring/loading superimposed models 
+result_path = PATH+'results/ShallowConvNet/' # numerical results 
+data_path = PATH+'dataset/IV2a_braindecode/' # data
 
 
 # Training subject specific 
@@ -21,9 +23,9 @@ batch_size = 64
 epochs = 500
 addon = 'lr={}_bs={}_epochs={}'.format(lr,batch_size, epochs)
 
-# train_subject_specific(addon=addon,model_path =model_path,data_path= data_path,
-#                  result_path=result_path,lr = lr,batch_size=batch_size,crossValidation=crossValidation, 
-#                  epochs = epochs,cuda = True,earlyStopping=True)
+train_subject_specific(addon=addon,model_path =model_path,data_path= data_path,
+                 result_path=result_path,lr = lr,batch_size=batch_size,crossValidation=crossValidation, 
+                 epochs = epochs,cuda = True,earlyStopping=True)
 
 
 # Training superposition
