@@ -144,21 +144,32 @@ def train_subject_specific(addon='',model_path = './initialModels/',data_path= '
 def validate_subject_specific(addon='',model_path = './initialModels/',data_path= './dataset/',
 				result_path=''):
 
-	numberOfSubjects = 1
-	
-	for subject in numberOfSubjects:
+	numberOfSubjects = 9
+	accuracy = np.zeros(numberOfSubjects)
+	kappa = np.zeros(numberOfSubjects)
+	print("Acc \tKappa")
+	for subject in range(numberOfSubjects):
 			
-			s = str(subject)
-			#load model
-			filename= 'model_subject{:}{:}{:}.pt'.format('test',subject,0)
-			
-			pretrainedModel =th.load(model_path+filename)
-			pretrainedModel.model.cuda()
+		#load model
+		_, _, test_set = loadData(data_path, subject+1, 0)
+		filename= 'model_subject{:}{:}{:}.pt'.format('test',subject+1,0)
+		
+		pretrainedModel =th.load(model_path+filename)
+		pretrainedModel.model.cuda()
+		pred=np.zeros(0)
+		true_label = np.zeros(0)
+		for batch in pretrainedModel.iterator.get_batches(test_set, shuffle=False):
+			preds, loss = pretrainedModel.eval_on_batch(batch[0], batch[1])
+			pred = np.append(pred,np.argmax(preds,axis=1))
+			true_label = np.append(true_label,batch[1])
+		#pdb.set_trace()
+		accuracy[subject] = 1- float(np.count_nonzero(pred-true_label))/len(true_label)
+		kappa[subject] = sk_metrics.cohen_kappa_score(pred,true_label)
 
+		print("{:.2f}\t{:.3f}".format(accuracy[subject]*100,kappa[subject]))
 
-			for batch in trainedModel.iterator.get_batches(sets, shuffle=False):
-				preds, loss = trainedModel.eval_on_batch(batch[0], batch[1])
-
+	print("Average")
+	print("{:.2f}\t{:.3f}".format(accuracy.mean()*100,kappa.mean()))
 	
 
 
@@ -322,9 +333,9 @@ def retrainNetwork (exp, retrainingEpochs, train_set, valid_set, test_set,  lr=1
 
 
 def loadData(data_folder, subject_id,fold=0):
-	# text_trap = io.StringIO()
-	# sys.stdout = text_trap
-	# warnings.filterwarnings("ignore")
+	text_trap = io.StringIO()
+	sys.stdout = text_trap
+	warnings.filterwarnings("ignore")
 
 	low_cut_hz = 4 # 0 or 4
 	ival = [-500, 4000]
