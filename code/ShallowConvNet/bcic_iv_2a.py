@@ -1,5 +1,3 @@
-#Copyright (c) 2019 ETH Zurich, Michael Hersche
-
 import numpy as np
 import mne
 from scipy.io import loadmat
@@ -19,10 +17,10 @@ class BCICompetition4Set2A(object):
         return cnt
 
     def extract_data(self):
-        
         raw_edf = mne.io.read_raw_edf(self.filename, stim_channel='auto')
         raw_edf.load_data()
         # correct nan values
+
         data = raw_edf.get_data()
 
         # do not correct stimulus channel
@@ -36,7 +34,7 @@ class BCICompetition4Set2A(object):
             chan_mean = np.nanmean(data[i_chan])
             data[i_chan, mask] = chan_mean
         gdf_events = raw_edf.find_edf_events()
-        raw_edf = mne.io.RawArray(data, raw_edf.info)#, verbose='WARNING')
+        raw_edf = mne.io.RawArray(data, raw_edf.info, verbose='WARNING')
         # remember gdf events
         raw_edf.info['gdf_events'] = gdf_events
         return raw_edf

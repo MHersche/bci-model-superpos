@@ -11,7 +11,9 @@ import torch.nn.functional as F
 from torch import optim
 import csv
 import random
+
 from bcic_iv_2a import BCICompetition4Set2A
+#from braindecode.datasets.bcic_iv_2a import BCICompetition4Set2A
 from braindecode.experiments.experiment import Experiment
 from braindecode.experiments.monitors import LossMonitor, MisclassMonitor, \
 	RuntimeMonitor
@@ -33,6 +35,7 @@ import pdb
 import copy
 import itertools
 import math
+import sklearn.metrics as sk_metrics
 
 log = logging.getLogger(__name__)
 
@@ -115,7 +118,7 @@ def train_subject_specific(addon='',model_path = './initialModels/',data_path= '
 							 stop_criterion=stop_criterion,
 							 remember_best_column='valid_misclass',
 							 run_after_early_stop=earlyStopping, cuda=cuda)
-			#print("Start training")
+			print("Start training")
 			exp.run()
 			
 			# save accuracy
@@ -136,6 +139,27 @@ def train_subject_specific(addon='',model_path = './initialModels/',data_path= '
 
 	metrics_to_csv(np.mean(metrics,axis=1), result_path+'sub_spec')
 	return
+
+
+def validate_subject_specific(addon='',model_path = './initialModels/',data_path= './dataset/',
+				result_path=''):
+
+	numberOfSubjects = 1
+	
+	for subject in numberOfSubjects:
+			
+			s = str(subject)
+			#load model
+			filename= 'model_subject{:}{:}{:}.pt'.format('test',subject,0)
+			
+			pretrainedModel =th.load(model_path+filename)
+			pretrainedModel.model.cuda()
+
+
+			for batch in trainedModel.iterator.get_batches(sets, shuffle=False):
+				preds, loss = trainedModel.eval_on_batch(batch[0], batch[1])
+
+	
 
 
 def train_superposition(Niter = 500,epochs=5, batch_size=64,lr=1e-4, 
@@ -298,9 +322,9 @@ def retrainNetwork (exp, retrainingEpochs, train_set, valid_set, test_set,  lr=1
 
 
 def loadData(data_folder, subject_id,fold=0):
-	text_trap = io.StringIO()
-	sys.stdout = text_trap
-	warnings.filterwarnings("ignore")
+	# text_trap = io.StringIO()
+	# sys.stdout = text_trap
+	# warnings.filterwarnings("ignore")
 
 	low_cut_hz = 4 # 0 or 4
 	ival = [-500, 4000]
@@ -327,9 +351,9 @@ def loadData(data_folder, subject_id,fold=0):
 
 	# Preprocessing
 
-	train_cnt = train_cnt.drop_channels(['STI 014', 'EOG-left',
+	train_cnt = train_cnt.drop_channels(['EOG-left',
 										 'EOG-central', 'EOG-right'])
-	assert len(train_cnt.ch_names) == 22
+	
 	# lets convert to millvolt for numerical stability of next operations
 	train_cnt = mne_apply(lambda a: a * 1e6, train_cnt)
 	train_cnt = mne_apply(
@@ -342,9 +366,9 @@ def loadData(data_folder, subject_id,fold=0):
 												  eps=1e-4).T,
 		train_cnt)
 
-	test_cnt = test_cnt.drop_channels(['STI 014', 'EOG-left',
+	test_cnt = test_cnt.drop_channels(['EOG-left',
 									   'EOG-central', 'EOG-right'])
-	assert len(test_cnt.ch_names) == 22
+
 	test_cnt = mne_apply(lambda a: a * 1e6, test_cnt)
 	test_cnt = mne_apply(
 		lambda a: bandpass_cnt(a, low_cut_hz, high_cut_hz, test_cnt.info['sfreq'],
@@ -389,12 +413,13 @@ def toMatrix(x, whichLayer):
 	elif whichLayer == 'conv_time': return np.reshape(x, (40,1,25,1))
 
 def getAccuracy (preds, true_labels):
-		predictedLabels = []
-		assert len(preds)==len(true_labels)
-		for pred in preds: predictedLabels.append(np.argmax(pred))
-		accuracy =1- np.count_nonzero(predictedLabels-true_labels)/len(true_labels)
+	predictedLabels = []
+	assert len(preds)==len(true_labels)
+	for pred in preds: predictedLabels.append(np.argmax(pred))
+	accuracy =1- np.count_nonzero(predictedLabels-true_labels)/len(true_labels)
 
-		return accuracy
+	return accuracy
+
 
 def testOnSet (trainedModel, sets):
 	true_accuracy_test = 0
