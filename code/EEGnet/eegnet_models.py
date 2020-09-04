@@ -1,4 +1,21 @@
-#Copyright (c) 2019 ETH Zurich, Michael Hersche
+#*----------------------------------------------------------------------------*
+#* Copyright (C) 2019 ETH Zurich, Switzerland                                 *
+#* SPDX-License-Identifier: Apache-2.0                                        *
+#*                                                                            *
+#* Licensed under the Apache License, Version 2.0 (the "License");            *
+#* you may not use this file except in compliance with the License.           *
+#* You may obtain a copy of the License at                                    *
+#*                                                                            *
+#* http://www.apache.org/licenses/LICENSE-2.0                                 *
+#*                                                                            *
+#* Unless required by applicable law or agreed to in writing, software        *
+#* distributed under the License is distributed on an "AS IS" BASIS,          *
+#* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   *
+#* See the License for the specific language governing permissions and        *
+#* limitations under the License.                                             *
+#*                                                                            *
+#* Authors: Michael Hersche                     							  *
+#*----------------------------------------------------------------------------*
 
 from keras.models import Model
 from keras.layers.core import Dense, Activation
@@ -20,16 +37,6 @@ from tensorflow.keras.constraints import max_norm
 def EEGNet(nb_classes, Chans=64, Samples=128, regRate=.25,
 			   dropoutRate=0.1, kernLength=128, numFilters=8, dropoutType='Dropout'):
 	"""
-
-	Requires Tensorflow >= 1.5 and Keras >= 2.1.3
-
-	Note that this implements the newest version of EEGNet and NOT the earlier
-	version (version v1 and v2 on arxiv). We strongly recommend using this
-	architecture as it performs much better and has nicer properties than
-	our earlier version.
-
-	Note that we use 'image_data_format' = 'channels_first' in there keras.json
-	configuration file.
 
 	Inputs:
 
